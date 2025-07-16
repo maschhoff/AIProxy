@@ -1,4 +1,6 @@
-# filename: proxy_server.py
+# filename: aiproxy.py
+# https://github.com/maschhoff/AIProxy
+# GPL Mathias Aschhoff 2025
 
 from fastapi import FastAPI, UploadFile
 import requests
