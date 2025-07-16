@@ -1,4 +1,4 @@
-fastapi
+fastapi 
+uvicorn 
+paho-mqtt 
 requests
-base64
-paho.mqtt.client
