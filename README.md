@@ -16,5 +16,7 @@ docker build -t aiproxy .
 docker run -d \
   -p 8000:8000 \
   --name aiproxy \
+  --e OPENAI_API_KEY="sk-..."
+  --e MQTT_BROKER="192.168.x.x" 
   aiproxy
 
