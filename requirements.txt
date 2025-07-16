@@ -1,0 +1,4 @@
+fastapi
+requests
+base64
+paho.mqtt.client
