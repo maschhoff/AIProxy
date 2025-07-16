@@ -19,4 +19,4 @@ jobs:
     - name: login and push
       run: |
             docker login -u knex666 -p ${{secrets.DOCKER_HUB_TOKEN}} 
-            docker push knex666/prpdf:latest-dev
+            docker push knex666/aiproxy:latest-dev
