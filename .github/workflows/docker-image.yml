@@ -1,0 +1,22 @@
+name: Docker Image CI PRPDF
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Build the Docker image
+      run: docker build . --file Dockerfile --tag knex666/aiproxy:latest-dev
+    - name: login and push
+      run: |
+            docker login -u knex666 -p ${{secrets.DOCKER_HUB_TOKEN}} 
+            docker push knex666/prpdf:latest-dev
