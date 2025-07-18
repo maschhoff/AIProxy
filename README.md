@@ -7,9 +7,9 @@
 
 ## Projektübersicht
 
-Dieses Projekt ist ein **FastAPI-basierter AI-Proxy**, der speziell dafür entwickelt wurde, Zählerstandsbilder zu verarbeiten. Es nutzt die fortschrittlichen **Google Gemini-Modelle (speziell `gemini-1.5-flash`)**, um Zählerstände aus hochgeladenen Bildern zu erkennen. Der erkannte Zählerstand wird zusammen mit einem Zeitstempel über **MQTT** (Message Queuing Telemetry Transport) an ein IoT-System gesendet.
+Dieses Projekt ist ein **FastAPI-basierter AI-Proxy**, der speziell dafür entwickelt wurde, Zählerstandsbilder z.B der ESP32 CAM zu verarbeiten. Es nutzt die fortschrittlichen **Google Gemini-Modelle (speziell `gemini-1.5-flash`)**, um Zählerstände aus hochgeladenen Bildern zu erkennen. Der erkannte Zählerstand wird zusammen mit einem Zeitstempel über **MQTT** (Message Queuing Telemetry Transport) an ein IoT-System gesendet.
 
-Ideal für Smart-Home-Lösungen, Energieüberwachung oder industrielle Anwendungen, bei denen physische Zählerstände digital erfasst und zentralisiert werden müssen.
+Ideal für Smart-Home-Lösungen wie Home Assistant, Energieüberwachung oder industrielle Anwendungen, bei denen physische Zählerstände digital erfasst und zentralisiert werden müssen.
 
 -----
 
