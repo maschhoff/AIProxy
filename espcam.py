@@ -6,7 +6,7 @@ import time
 # Kamera-Setup für ESP32-CAM (Beispiel)
 import esp32_camera as camera  # Passendes Kamera-Modul verwenden
 
-# ⚡️ Blitz-LED (GPIO 4)
+# Blitz-LED (GPIO 4)
 flash = machine.Pin(4, machine.Pin.OUT)
 
 # WLAN verbinden
@@ -20,7 +20,7 @@ def connect_wifi(ssid, password):
             time.sleep(1)
     print('Netzwerk config:', wlan.ifconfig())
 
-# 📸 Foto aufnehmen mit Blitz
+# Foto aufnehmen mit Blitz
 def capture_image():
     flash.on()  # Blitz AN
     time.sleep(0.2)  # kurze Einschaltzeit vor Foto
@@ -30,7 +30,7 @@ def capture_image():
     flash.off()  # Blitz AUS
     return buf
 
-# 📤 Bild an Backend senden
+# Bild an Backend senden
 def send_image_to_ai(image_data, backend):
     url = "http://" + backend + "/process_meter_image"
     headers = {
@@ -49,7 +49,7 @@ def send_image_to_ai(image_data, backend):
     except Exception as e:
         print("Fehler beim Senden:", e)
 
-# 🔁 Main-Loop
+# Main-Loop
 SSID = "DEIN_SSID"
 PASSWORD = "DEIN_PASSWORT"
 BACKEND = "192.168.100.100"
