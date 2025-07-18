@@ -37,14 +37,15 @@ Stell sicher, dass die folgenden Komponenten installiert sind:
 
 **Docker**
 
-    ```bash
+´´´bash
 docker run -d \
   -p 8000:8000 \
   --name aiproxy \
   -e GOOGLE_API_KEY="sk-..."
   -e MQTT_BROKER="192.168.x.x" 
   knex666/aiproxy:latest-dev
-  ```
+  ´´´
+
 
 
 
