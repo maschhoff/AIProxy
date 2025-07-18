@@ -25,8 +25,8 @@ def capture_image():
     return buf
 
 # Bild an deinen Backend-Endpoint schicken
-def send_image_to_chatgpt(image_data):
-    url = "http://DEIN_BACKEND/process_meter_image"  # Dein Proxy-Server!
+def send_image_to_ai(image_data,backend):
+    url = "http://"+backend+"/process_meter_image"  # Dein Proxy-Server!
     headers = {
         "Content-Type": "application/octet-stream"
     }
@@ -46,10 +46,11 @@ def send_image_to_chatgpt(image_data):
 # Main-Loop
 SSID = "DEIN_SSID"
 PASSWORD = "DEIN_PASSWORT"
+BACKEND = "192.168.100.100"
 
 connect_wifi(SSID, PASSWORD)
 
 while True:
     image = capture_image()
-    send_image_to_chatgpt(image)
+    send_image_to_ai(image,BACKEND)
     time.sleep(600)  # 600 Sekunden = 10 Minuten
