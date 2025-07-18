@@ -26,7 +26,7 @@ def capture_image():
 
 # Bild an deinen Backend-Endpoint schicken
 def send_image_to_chatgpt(image_data):
-    url = "http://DEIN_BACKEND/chatgpt/vision"  # Dein Proxy-Server!
+    url = "http://DEIN_BACKEND/process_meter_image"  # Dein Proxy-Server!
     headers = {
         "Content-Type": "application/octet-stream"
     }
