@@ -31,7 +31,7 @@ async def process_meter_image(file: UploadFile):
 
     try:
         # Load the Gemini Pro Vision model
-        model = genai.GenerativeModel('gemini-pro')
+        model = genai.GenerativeModel('gemini-1.5-pro')
 
         image_bytes = await file.read()
         
