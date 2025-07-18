@@ -108,6 +108,26 @@ curl -X POST "http://localhost:8000/process_meter_image" \
 
 Ersetze `/pfad/zu/deinem/zaehlerbild.jpg` durch den tatsächlichen Pfad zu deinem Bild. Stell sicher, dass der `type` (z.B. `image/jpeg` oder `image/png`) dem tatsächlichen Bildtyp entspricht.
 
+
+### RUN
+
+export GOOGLE_API_KEY="sk-..."
+
+export MQTT_BROKER="192.168.x.x"   # IP deines MQTT-Brokers
+
+uvicorn aiproxy:app --host 0.0.0.0 --port 8000
+
+### Docker
+docker run -d \
+  -p 8000:8000 \
+  --name aiproxy \
+  -e GOOGLE_API_KEY="sk-..."
+  -e MQTT_BROKER="192.168.x.x" 
+  knex666/aiproxy:latest-dev
+
+
+
+
 ### MQTT-Nachricht
 
 Der Proxy veröffentlicht die Daten im folgenden JSON-Format an den konfigurierten `MQTT_TOPIC` (standardmäßig `zaehler/stand`):
@@ -137,21 +157,4 @@ Dieses Projekt ist unter der [GNU General Public License v3.0 (GPLv3)](https://w
 ## Beitragen
 
 Beiträge sind willkommen\! Wenn du Fehler findest oder Verbesserungen vorschlagen möchtest, öffne bitte ein Issue oder sende einen Pull Request.
-
-
-# RUN
-
-export GOOGLE_API_KEY="sk-..."
-
-export MQTT_BROKER="192.168.x.x"   # IP deines MQTT-Brokers
-
-uvicorn aiproxy:app --host 0.0.0.0 --port 8000
-
-# Docker
-docker run -d \
-  -p 8000:8000 \
-  --name aiproxy \
-  -e GOOGLE_API_KEY="sk-..."
-  -e MQTT_BROKER="192.168.x.x" 
-  knex666/aiproxy:latest-dev
 
