@@ -30,8 +30,8 @@ async def process_meter_image(file: UploadFile):
         return {"error": "GOOGLE_API_KEY not set"}
 
     try:
-        # Load the Gemini 1.5 Pro Vision model
-        model = genai.GenerativeModel('gemini-1.5-pro')
+        # Load the Gemini Pro Vision model
+        model = genai.GenerativeModel('gemini-pro')
 
         image_bytes = await file.read()
         
