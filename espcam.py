@@ -32,7 +32,7 @@ def send_image_to_ai(image_data,backend):
     }
     try:
         response = urequests.post(
-            url + "?prompt=Bitte lies den Zählerstand auf diesem Bild ab",
+            url,
             headers=headers,
             data=image_data
         )
