@@ -1,4 +1,3 @@
-
 -----
 
 # AIProxy - AI-Zählerstandserfassung via MQTT Proxy
