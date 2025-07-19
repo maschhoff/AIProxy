@@ -35,6 +35,8 @@ def capture_image():
 
 # Bild an Backend senden
 def send_image_to_ai(image_data, backend):
+
+    //TODO nicht als octet stream bauen
     url = "http://" + backend + "/process_meter_image"
     headers = {
         "Content-Type": "application/octet-stream"
