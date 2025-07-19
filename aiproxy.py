@@ -28,8 +28,8 @@ async def process_meter_image(file: UploadFile):
     if not GOOGLE_API_KEY:
         raise HTTPException(status_code=400, detail="GOOGLE_API_KEY not set.")
 
-    if not file.content_type.startswith("image/"):
-        raise HTTPException(status_code=400, detail="Uploaded file is not an image.")
+    #if not file.content_type.startswith("image/"):
+    #    raise HTTPException(status_code=400, detail="Uploaded file is not an image.")
 
     # Erfasse den Zeitstempel am Anfang der Verarbeitung
     timestamp = datetime.datetime.now().isoformat()
