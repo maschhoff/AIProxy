@@ -23,16 +23,19 @@ def connect_wifi(ssid, password):
             time.sleep(1)
     print('Netzwerk config:', wlan.ifconfig())
 
-# Foto aufnehmen mit Blitz
 def capture_image():
     flash.on()  # Blitz AN
     time.sleep(0.2)  # kurze Einschaltzeit vor Foto
     camera.init()
     buf = camera.capture()
-    camera.deinit()
-    flash.off()  # Blitz AUS
-    print("Image taken "+len(buf))
-    return buf
+    if not buf:
+        print("Fehler bei der Bildaufnahme")
+        return buf
+    else:
+        camera.deinit()
+        flash.off()  # Blitz AUS
+        print("Bild aufgenommen "+len(buf))
+        return buf
 
 # Bild an Backend senden
 import socket
