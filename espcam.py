@@ -2,7 +2,7 @@
 # Mathias Aschhoff 2025
 
 import network
-import requests
+import requests # https://github.com/micropython/micropython-lib/tree/master/python-ecosys/requests
 import machine
 import time
 import sys
@@ -72,7 +72,7 @@ def send_image_to_ai(image_data, backend):
 # Main-Loop
 SSID = "xxx"
 PASSWORD = "xxx"
-BACKEND = "192.168.0.109:8000"
+BACKEND = "192.168.100.109:8000"
 
 connect_wifi(SSID, PASSWORD)
 
