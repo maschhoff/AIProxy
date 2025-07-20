@@ -2,12 +2,12 @@
 # Mathias Aschhoff 2025
 
 import network
-import urequests
+import socket
 import machine
 import time
 
 # Kamera-Setup für ESP32-CAM (Beispiel)
-import esp32_camera as camera  # Passendes Kamera-Modul verwenden
+import camera  # Passendes Kamera-Modul verwenden
 
 # Blitz-LED (GPIO 4)
 flash = machine.Pin(4, machine.Pin.OUT)
@@ -27,37 +27,68 @@ def connect_wifi(ssid, password):
 def capture_image():
     flash.on()  # Blitz AN
     time.sleep(0.2)  # kurze Einschaltzeit vor Foto
-    camera.init(0, format=camera.JPEG)
+    camera.init()
     buf = camera.capture()
     camera.deinit()
     flash.off()  # Blitz AUS
+    print("Image taken "+len(buf))
     return buf
 
 # Bild an Backend senden
-def send_image_to_ai(image_data, backend):
+import socket
 
-    //TODO nicht als octet stream bauen
-    url = "http://" + backend + "/process_meter_image"
-    headers = {
-        "Content-Type": "application/octet-stream"
-    }
+def send_image_to_ai(image_data, backend):
+    # KEIN "http://" im backend
+    host = backend  # z. B. "192.168.1.42"
+    path = "/process_meter_image"
+    port = 8000
+
     try:
-        response = urequests.post(
-            url,
-            headers=headers,
-            data=image_data
-        )
-        print("Status:", response.status_code)
-        if response.status_code == 200:
-            print("Antwort:", response.text)
-        response.close()
+        # DNS-Auflösung
+        addr_info = socket.getaddrinfo(host, port)
+        if not addr_info:
+            print("Fehler: konnte Host nicht auflösen")
+            return
+
+        addr = addr_info[0][-1]
+        s = socket.socket()
+        s.connect(addr)
+
+        # Header bauen
+        content_length = len(image_data)
+        headers = (
+            "POST {} HTTP/1.1\r\n"
+            "Host: {}\r\n"
+            "Content-Type: application/octet-stream\r\n"
+            "Content-Length: {}\r\n"
+            "Connection: close\r\n\r\n"
+        ).format(path, host, content_length)
+
+        s.send(headers.encode('utf-8'))
+        s.send(image_data)
+
+        # Antwort empfangen
+        response = b""
+        while True:
+            chunk = s.recv(512)
+            if not chunk:
+                break
+            response += chunk
+
+        s.close()
+
+        # Ausgabe
+        response_str = response.decode("utf-8", "ignore")
+        print("Antwort:", response_str.split("\r\n\r\n", 1)[-1])
+
     except Exception as e:
         print("Fehler beim Senden:", e)
 
+
 # Main-Loop
-SSID = "DEIN_SSID"
-PASSWORD = "DEIN_PASSWORT"
-BACKEND = "192.168.100.100"
+SSID = "xxx"
+PASSWORD = "xxx"
+BACKEND = "192.168.100.109"
 
 connect_wifi(SSID, PASSWORD)
 
