@@ -2,9 +2,10 @@
 # Mathias Aschhoff 2025
 
 import network
-import socket
+import requests
 import machine
 import time
+import sys
 
 # Kamera-Setup für ESP32-CAM (Beispiel)
 import camera  # Passendes Kamera-Modul verwenden
@@ -23,67 +24,47 @@ def connect_wifi(ssid, password):
             time.sleep(1)
     print('Netzwerk config:', wlan.ifconfig())
 
+# Foto aufnehmen mit Blitz
 def capture_image():
     flash.on()  # Blitz AN
     time.sleep(0.2)  # kurze Einschaltzeit vor Foto
     camera.init()
     buf = camera.capture()
+    flash.off()  # Blitz AUS
+    camera.deinit()
     if not buf:
         print("Fehler bei der Bildaufnahme")
-        return buf
+        sys.exit()
     else:
-        camera.deinit()
-        flash.off()  # Blitz AUS
-        print("Bild aufgenommen "+len(buf))
+        print("Bild aufgenommen")
         return buf
-
-# Bild an Backend senden
-import socket
 
 def send_image_to_ai(image_data, backend):
-    # KEIN "http://" im backend
-    host = backend  # z. B. "192.168.1.42"
-    path = "/process_meter_image"
-    port = 8000
+    url = "http://" + backend + "/process_meter_image"
+    
+    # Multipart/FormData bauen
+    boundary = "----WebKitFormBoundary7MA4YWxkTrZu0gW"
+    headers = {
+        "Content-Type": f"multipart/form-data; boundary={boundary}"
+    }
+    
+    # Multipart body als Bytes zusammensetzen
+    body_start = (
+        "--{}\r\n".format(boundary) +
+        'Content-Disposition: form-data; name="file"; filename="image.jpg"\r\n' +
+        "Content-Type: image/jpeg\r\n\r\n"
+    ).encode()
 
+    body_end = "\r\n--{}--\r\n".format(boundary).encode()
+
+    body = body_start + image_data + body_end
+    
     try:
-        # DNS-Auflösung
-        addr_info = socket.getaddrinfo(host, port)
-        if not addr_info:
-            print("Fehler: konnte Host nicht auflösen")
-            return
-
-        addr = addr_info[0][-1]
-        s = socket.socket()
-        s.connect(addr)
-
-        # Header bauen
-        content_length = len(image_data)
-        headers = (
-            "POST {} HTTP/1.1\r\n"
-            "Host: {}\r\n"
-            "Content-Type: application/octet-stream\r\n"
-            "Content-Length: {}\r\n"
-            "Connection: close\r\n\r\n"
-        ).format(path, host, content_length)
-
-        s.send(headers.encode('utf-8'))
-        s.send(image_data)
-
-        # Antwort empfangen
-        response = b""
-        while True:
-            chunk = s.recv(512)
-            if not chunk:
-                break
-            response += chunk
-
-        s.close()
-
-        # Ausgabe
-        response_str = response.decode("utf-8", "ignore")
-        print("Antwort:", response_str.split("\r\n\r\n", 1)[-1])
-
+        response = requests.post(url, headers=headers, data=body)
+        print("Status:", response.status_code)
+        if response.status_code == 200:
+            print("Antwort:", response.text)
+        response.close()
     except Exception as e:
         print("Fehler beim Senden:", e)
 
@@ -91,7 +72,7 @@ def send_image_to_ai(image_data, backend):
 # Main-Loop
 SSID = "xxx"
 PASSWORD = "xxx"
-BACKEND = "192.168.100.109"
+BACKEND = "192.168.0.109:8000"
 
 connect_wifi(SSID, PASSWORD)
 
