@@ -44,6 +44,7 @@ docker run -d \
   --name aiproxy \
   -e GOOGLE_API_KEY="sk-..." \
   -e MQTT_BROKER="192.168.x.x" \
+  -e MQTT_TOPIC="zaehler/stand"
   knex666/aiproxy:latest-dev
 ```
 
