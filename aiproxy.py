@@ -7,6 +7,7 @@ import datetime # Import für den Zeitstempel
 import json     # Import für JSON-Formatierung
 import paho.mqtt.client as mqtt
 import google.generativeai as genai
+from pathlib import Path
 
 app = FastAPI()
 
@@ -14,7 +15,7 @@ app = FastAPI()
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 MQTT_BROKER = os.getenv("MQTT_BROKER", "localhost")
 MQTT_TOPIC =  os.getenv("MQTT_TOPIC") 
-DEBUG = os.getenv("DEBUG") or False
+DEBUG = os.getenv("DEBUG", "false").lower() in ["1", "true", "yes"]
 
 @app.on_event("startup")
 async def startup_event():
@@ -32,6 +33,9 @@ async def process_meter_image(file: UploadFile):
     if not file.content_type.startswith("image/"):
         raise HTTPException(status_code=400, detail="Uploaded file is not an image.")
 
+    if not MQTT_TOPIC:
+        raise HTTPException(status_code=500, detail="MQTT_TOPIC environment variable not set.")
+
     # Erfasse den Zeitstempel am Anfang der Verarbeitung
     timestamp = datetime.datetime.now().isoformat()
 
@@ -40,17 +44,17 @@ async def process_meter_image(file: UploadFile):
 
         image_bytes = await file.read()
 
-        #if DEBUG:
-        # --- Bild speichern ---
-        save_dir = Path("img")
-        save_dir.mkdir(parents=True, exist_ok=True)
-    
-        timestamp = datetime.datetime.now().isoformat().replace(":", "-").replace(".", "-")
-        filename = f"img_{timestamp}.jpg"
-        file_path = save_dir / filename
-    
-        with open(file_path, "wb") as f:
-            f.write(image_bytes)
+        if DEBUG:
+            # --- Bild speichern ---
+            save_dir = Path("img")
+            save_dir.mkdir(parents=True, exist_ok=True)
+        
+            timestamp = datetime.datetime.now().isoformat().replace(":", "-").replace(".", "-")
+            filename = f"img_{timestamp}.jpg"
+            file_path = save_dir / filename
+        
+            with open(file_path, "wb") as f:
+                f.write(image_bytes)
 
         
         image_part = {
