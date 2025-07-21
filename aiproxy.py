@@ -14,7 +14,7 @@ app = FastAPI()
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 MQTT_BROKER = os.getenv("MQTT_BROKER", "localhost")
 MQTT_TOPIC =  os.getenv("MQTT_TOPIC") 
-DEBUG = os.getenv("MQTT_TOPIC") or False
+DEBUG = os.getenv("DEBUG") or False
 
 @app.on_event("startup")
 async def startup_event():
@@ -41,15 +41,14 @@ async def process_meter_image(file: UploadFile):
         image_bytes = await file.read()
 
         if DEBUG:
-
-              # --- Bild speichern ---
+            # --- Bild speichern ---
             save_dir = Path("img")
-            save_dir.mkdir(exist_ok=True)
-    
-            # Erstelle einen sicheren Dateinamen mit Zeitstempel
-            filename = "img.jpg"
+            save_dir.mkdir(parents=True, exist_ok=True)
+        
+            timestamp = datetime.datetime.now().isoformat().replace(":", "-").replace(".", "-")
+            filename = f"img_{timestamp}.jpg"
             file_path = save_dir / filename
-    
+        
             with open(file_path, "wb") as f:
                 f.write(image_bytes)
 
