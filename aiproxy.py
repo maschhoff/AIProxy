@@ -40,17 +40,17 @@ async def process_meter_image(file: UploadFile):
 
         image_bytes = await file.read()
 
-        if DEBUG:
-            # --- Bild speichern ---
-            save_dir = Path("img")
-            save_dir.mkdir(parents=True, exist_ok=True)
-        
-            timestamp = datetime.datetime.now().isoformat().replace(":", "-").replace(".", "-")
-            filename = f"img_{timestamp}.jpg"
-            file_path = save_dir / filename
-        
-            with open(file_path, "wb") as f:
-                f.write(image_bytes)
+        #if DEBUG:
+        # --- Bild speichern ---
+        save_dir = Path("img")
+        save_dir.mkdir(parents=True, exist_ok=True)
+    
+        timestamp = datetime.datetime.now().isoformat().replace(":", "-").replace(".", "-")
+        filename = f"img_{timestamp}.jpg"
+        file_path = save_dir / filename
+    
+        with open(file_path, "wb") as f:
+            f.write(image_bytes)
 
         
         image_part = {
