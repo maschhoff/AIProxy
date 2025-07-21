@@ -13,7 +13,8 @@ app = FastAPI()
 # Make sure to set your Google API Key as an environment variable
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 MQTT_BROKER = os.getenv("MQTT_BROKER", "localhost")
-MQTT_TOPIC = "zaehler/stand"
+MQTT_TOPIC =  os.getenv("MQTT_TOPIC") 
+DEBUG = os.getenv("MQTT_TOPIC") or False
 
 @app.on_event("startup")
 async def startup_event():
@@ -38,6 +39,20 @@ async def process_meter_image(file: UploadFile):
         model = genai.GenerativeModel('gemini-1.5-flash')
 
         image_bytes = await file.read()
+
+        if DEBUG:
+
+              # --- Bild speichern ---
+            save_dir = Path("img")
+            save_dir.mkdir(exist_ok=True)
+    
+            # Erstelle einen sicheren Dateinamen mit Zeitstempel
+            filename = "img.jpg"
+            file_path = save_dir / filename
+    
+            with open(file_path, "wb") as f:
+                f.write(image_bytes)
+
         
         image_part = {
             "mime_type": file.content_type,
