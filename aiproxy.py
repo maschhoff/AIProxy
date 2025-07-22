@@ -1,7 +1,7 @@
 # filename: aiproxy.py
 # GPL Mathias Aschhoff 2025
 
-from fastapi import FastAPI, UploadFile, HTTPException
+from fastapi import FastAPI, UploadFile, HTTPException, File, Query
 import os
 import datetime # Import für den Zeitstempel
 import json     # Import für JSON-Formatierung
@@ -14,7 +14,7 @@ app = FastAPI()
 # Make sure to set your Google API Key as an environment variable
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 MQTT_BROKER = os.getenv("MQTT_BROKER", "localhost")
-MQTT_TOPIC =  os.getenv("MQTT_TOPIC") 
+MQTT_TOPIC = "zaehler/stand"
 DEBUG = os.getenv("DEBUG", "false").lower() in ["1", "true", "yes"]
 
 @app.on_event("startup")
@@ -26,15 +26,17 @@ async def startup_event():
         print("Warning: GOOGLE_API_KEY environment variable not set. Gemini API calls will fail.")
 
 @app.post("/process_meter_image")
-async def process_meter_image(file: UploadFile):
+async def process_meter_image(file: UploadFile = File(...), mqtt_topic: str = Query(...)):
     if not GOOGLE_API_KEY:
         raise HTTPException(status_code=400, detail="GOOGLE_API_KEY not set.")
 
     if not file.content_type.startswith("image/"):
         raise HTTPException(status_code=400, detail="Uploaded file is not an image.")
 
-    if not MQTT_TOPIC:
-        raise HTTPException(status_code=500, detail="MQTT_TOPIC environment variable not set.")
+    if not mqtt_topic:
+        raise HTTPException(status_code=400, detail="mqtt_topic parameter is required.")
+
+    MQTT_TOPIC=mqtt_topic
 
     # Erfasse den Zeitstempel am Anfang der Verarbeitung
     timestamp = datetime.datetime.now().isoformat()
