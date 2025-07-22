@@ -6,6 +6,7 @@ import requests # https://github.com/micropython/micropython-lib/tree/master/pyt
 import machine
 import time
 import sys
+import settings
 
 # Kamera-Setup für ESP32-CAM (Beispiel)
 import camera  # Passendes Kamera-Modul verwenden
@@ -70,10 +71,6 @@ def send_image_to_ai(image_data, backend):
 
 
 # Main-Loop
-SSID = "xxx"
-PASSWORD = "xxx"
-BACKEND = "192.168.100.109:8000"
-MQTT_TOPIC = "zaehler/strom"
 
 connect_wifi(SSID, PASSWORD)
 
