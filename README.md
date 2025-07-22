@@ -34,7 +34,7 @@ Stell sicher, dass die folgenden Komponenten installiert sind:
 
 ### Installation
 
-X. **Docker**
+#### Docker
 
 -----
 
@@ -44,12 +44,12 @@ docker run -d \
   --name aiproxy \
   -e GOOGLE_API_KEY="sk-..." \
   -e MQTT_BROKER="192.168.x.x" \
-  -e MQTT_TOPIC="zaehler/stand"
   knex666/aiproxy:latest-dev
 ```
 
 -----
 
+#### Python
 
 1.  **Repository klonen:**
 
@@ -88,7 +88,6 @@ Erstelle eine `.env`-Datei im Stammverzeichnis deines Projekts und füge die fol
 ```dotenv
 GOOGLE_API_KEY="DEIN_GOOGLE_API_SCHLUESSEL"
 MQTT_BROKER="localhost" # Oder die IP/Hostname deines MQTT-Brokers
-MQTT_TOPIC="zaehler/stand" # Der MQTT-Topic, auf dem die Daten veröffentlicht werden
 ```
 
 **Wichtig:** Ersetze `"DEIN_GOOGLE_API_SCHLUESSEL"` durch deinen echten Google API-Schlüssel. Behandle diesen Schlüssel vertraulich und gib ihn nicht öffentlich frei.
@@ -116,7 +115,7 @@ Sende eine `POST`-Anfrage an den `/process_meter_image`-Endpunkt mit dem Zähler
 ### Beispiel mit `curl`
 
 ```bash
-curl -X POST "http://localhost:8000/process_meter_image" \
+curl -X POST "http://localhost:8000/process_meter_image?mqtt_topic=zaehler/stand" \
      -H "accept: application/json" \
      -H "Content-Type: multipart/form-data" \
      -F "file=@/pfad/zu/deinem/zaehlerbild.jpg;type=image/jpeg"
