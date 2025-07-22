@@ -40,7 +40,7 @@ def capture_image():
         return buf
 
 def send_image_to_ai(image_data, backend):
-    url = "http://" + backend + "/process_meter_image"
+    url = "http://" + backend + "/process_meter_image?mqtt_topic="+MQTT_TOPIC
     
     # Multipart/FormData bauen
     boundary = "----WebKitFormBoundary7MA4YWxkTrZu0gW"
@@ -73,6 +73,7 @@ def send_image_to_ai(image_data, backend):
 SSID = "xxx"
 PASSWORD = "xxx"
 BACKEND = "192.168.100.109:8000"
+MQTT_TOPIC = "zaehler/strom"
 
 connect_wifi(SSID, PASSWORD)
 
