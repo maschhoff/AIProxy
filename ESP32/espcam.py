@@ -6,7 +6,7 @@ import requests # https://github.com/micropython/micropython-lib/tree/master/pyt
 import machine
 import time
 import sys
-import settings
+from settings import * 
 
 # Kamera-Setup für ESP32-CAM (Beispiel)
 import camera  # Passendes Kamera-Modul verwenden
