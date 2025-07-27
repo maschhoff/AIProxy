@@ -29,7 +29,7 @@ def connect_wifi(ssid, password):
 def capture_image():
     flash.on()  # Blitz AN
     time.sleep(0.2)  # kurze Einschaltzeit vor Foto
-    camera.init(0, format=camera.JPEG, fb_location=camera.PSRAM)
+    camera.init(0, format=camera.JPEG) 
     buf = camera.capture()
     flash.off()  # Blitz AUS
     camera.deinit()
