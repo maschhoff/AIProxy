@@ -24,7 +24,7 @@ Dieses MicroPython-Skript für einen **ESP32-CAM** erfasst in regelmäßigen Abs
 
 ### Software
 
-* **MicroPython Firmware:** CAM Firmware min 2.21.
+* **MicroPython Firmware:** CAM Firmware min 2.21. (https://github.com/lemariva/micropython-camera-driver)
 * **MicroPython:** Das Skript ist für die Ausführung unter MicroPython konzipiert.
 * **`camera` Modul:** Ein passendes `camera`-Modul für MicroPython ist erforderlich. Die genaue Implementierung kann je nach ESP32-CAM-Variante variieren.
 
