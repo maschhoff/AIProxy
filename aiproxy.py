@@ -66,25 +66,28 @@ async def process_meter_image(file: UploadFile = File(...), mqtt_topic: str = Qu
 
         prompt_parts = [
             image_part,
-            "Bitte lies den Zählerstand auf diesem Bild ab. Gib nur die Zahl des Zählerstands zurück, ohne zusätzlichen Text.",
+            "Bitte lies den Zählerstand auf diesem Bild ab. Gib nur die Zahl des Zählerstands zurück, ohne zusätzlichen Text. Solltest du keine Zahl erkennen können gib false zurück.",
         ]
 
         response = await model.generate_content_async(prompt_parts)
+
+
+        try:
         
         meter_reading = response.text.strip()
         
-        if not meter_reading.isdigit():
-            print(f"WARNUNG: Zählerstand ist keine Zahl: '{meter_reading}'. Versuche trotzdem zu senden.")
-            # Du könntest hier auch eine HTTPException auslösen, wenn nur numerische Werte erlaubt sind.
+            if not meter_reading.isdigit():
+                print(f"WARNUNG: Zählerstand ist keine Zahl: '{meter_reading}'. Versuche trotzdem zu senden.")
+                raise HTTPException(status_code=500, detail=f"Failed to send data via MQTT: Zählerstand ist keine Zahl")
 
-        # --- MQTT-Nachricht als JSON senden ---
-        mqtt_payload = {
-            "timestamp": timestamp,
-            "meter_reading": meter_reading
-        }
-        mqtt_message = json.dumps(mqtt_payload) # Konvertiere das Dictionary in einen JSON-String
+            # --- MQTT-Nachricht als JSON senden ---
+            mqtt_payload = {
+                "timestamp": timestamp,
+                "meter_reading": meter_reading
+            }
+            mqtt_message = json.dumps(mqtt_payload) # Konvertiere das Dictionary in einen JSON-String
 
-        try:
+       
             client = mqtt.Client()
             client.connect(MQTT_BROKER, 1883, 60)
             client.publish(MQTT_TOPIC, mqtt_message) # Sende den JSON-String
