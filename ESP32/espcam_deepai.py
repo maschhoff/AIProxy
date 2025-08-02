@@ -6,7 +6,8 @@ import urequests as requests  # "urequests" für MicroPython
 import machine
 import time
 import sys
-from settings import * 
+from settings_deep import * 
+from umqtt.simple import MQTTClient
 
 import camera  # Passendes Kamera-Modul verwenden
 
@@ -67,17 +68,29 @@ def send_image_to_deepai(image_data, api_key):
         print("Status:", response.status_code)
         if response.status_code == 200:
             print("Antwort:", response.text)
+            return response.text
         else:
             print("Fehlerantwort:", response.text)
+            return 0
         response.close()
     except Exception as e:
         print("Fehler beim Senden:", e)
 
+def send_mqtt(zaehlerstand, broker, port, topic):
+    try:
+        client = MQTTClient("esp32_cam", broker, port)
+        client.connect()
+        client.publish(topic, zaehlerstand)
+        print("Zählerstand per MQTT gesendet:", zaehlerstand)
+        client.disconnect()
+    except Exception as e:
+        print("MQTT Fehler:", e)
 
 # Main-Loop
 connect_wifi(SSID, PASSWORD)
 
 while True:
     img = capture_image()
-    send_image_to_deepai(img, DEEPAI_API_KEY)
+    stand=send_image_to_deepai(img, DEEPAI_API_KEY)
+    send_mqtt(stand,MQTT_BROKER, MQTT_PORT, MQTT_TOPIC)
     time.sleep(600)  # alle 10 Minuten
