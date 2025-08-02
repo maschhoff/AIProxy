@@ -20,7 +20,7 @@ Dieses MicroPython-Skript für einen **ESP32-CAM** erfasst in regelmäßigen Abs
 
 ### Hardware
 
-* **ESP32-CAM:** Ein ESP32-Board mit integrierter Kamera.
+* **ESP32-CAM 8MB PSRAM:** Ein ESP32-Board mit integrierter Kamera und 8MB PSRAM.
 
 ### Software
 
