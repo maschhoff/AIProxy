@@ -101,10 +101,11 @@ def send_image_to_replicate(image_data, api_token):
 
         ssl_sock.close()
         response_text = response.decode()
-        print("Antwort:", response_text)
+        #print("Antwort:", response_text)
 
         if "200 OK" in response_text or "201 Created" in response_text:
             body = response_text.split("\r\n\r\n", 1)[1]
+            print("Antwort:", body)
             try:
                 parsed = json.loads(body)
                 return parsed
