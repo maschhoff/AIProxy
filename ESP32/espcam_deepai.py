@@ -48,7 +48,7 @@ def send_image_to_deepai(image_data, api_key):
 
     boundary = "----DeepAIBoundary"
 
-    prompt_text = "Lies den Zählerstand ab."
+    prompt_text = "Lies den Zählerstand ab und gib den Wert als Integer zurück"
 
     # Multipart-Body manuell bauen
     body = (
