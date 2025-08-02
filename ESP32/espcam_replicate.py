@@ -56,9 +56,9 @@ def send_image_to_replicate(image_data, api_token):
 
     # JSON-Body erstellen – Modellabhängig!
     data = {
-        "version": "2e1dddc8621f72155f24cf2e0adbde548458d3cab9f00c0139eea840d0ac4746",
+        "version": "80537f9eead1a5bfa72d5ac6ea6414379be41d4d4f6679fd776e9535d1eb58bb",
         "input": {
-            "image_base64": image_base64,
+            "image": image_base64,
             "prompt": "Lese den Zählerstand und gib ihn als Integer zurück."
         }
     }
