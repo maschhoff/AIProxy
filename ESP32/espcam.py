@@ -1,4 +1,4 @@
-# AIProxy ESP32 CAM Image Module 
+# AIProxy ESP32 CAM Image Module using GIMINI AI
 # © 2025 Mathias Aschhoff
 
 import network
@@ -13,7 +13,7 @@ import time
 import usocket
 import ussl
 import ubinascii
-import camera  # Passendes Kamera-Modul verwenden
+import camera 
 
 # Blitz-LED (GPIO 4)
 flash = machine.Pin(4, machine.Pin.OUT)
