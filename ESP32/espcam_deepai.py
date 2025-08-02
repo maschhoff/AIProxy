@@ -8,6 +8,8 @@ import time
 import sys
 from settings_deep import * 
 from umqtt.simple import MQTTClient
+import ujson as json
+import time
 
 import camera  # Passendes Kamera-Modul verwenden
 
@@ -78,11 +80,23 @@ def send_image_to_deepai(image_data, api_key):
 
 def send_mqtt(zaehlerstand, broker, port, topic):
     try:
+        # Zeit holen im Format ISO 8601
+        t = time.localtime()
+        timestamp = "{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:{:02d}".format(*t[:6])
+
+        payload = {
+            "timestamp": timestamp,
+            "zaehlerstand": zaehlerstand
+        }
+
+        msg = json.dumps(payload)
+
         client = MQTTClient("esp32_cam", broker, port)
         client.connect()
-        client.publish(topic, zaehlerstand)
-        print("Zählerstand per MQTT gesendet:", zaehlerstand)
+        client.publish(topic, msg)
+        print("MQTT gesendet:", msg)
         client.disconnect()
+
     except Exception as e:
         print("MQTT Fehler:", e)
 
