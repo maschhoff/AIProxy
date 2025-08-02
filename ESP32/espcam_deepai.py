@@ -38,28 +38,29 @@ def capture_image():
     print("Bild aufgenommen")
     return buf
 
-# Bild an DeepAI senden
 def send_image_to_deepai(image_data, api_key):
-    url = "https://api.deepai.org/api/ocr"
+    url = "https://api.deepai.org/api/openai-vision"
 
     headers = {
         "api-key": api_key,
+        "Content-Type": "multipart/form-data; boundary=----DeepAIBoundary"
     }
 
-    # DeepAI erwartet FormData: "image" als Datei
-    files = {
-        'image': ('image.jpg', image_data, 'image/jpeg')
-    }
-
-    # Multipart-Form manuell bauen (MicroPython hat keine requests-toolbelt)
     boundary = "----DeepAIBoundary"
+
+    prompt_text = "Lies den Zählerstand ab."
+
+    # Multipart-Body manuell bauen
     body = (
         "--" + boundary + "\r\n" +
         'Content-Disposition: form-data; name="image"; filename="image.jpg"\r\n' +
         "Content-Type: image/jpeg\r\n\r\n"
-    ).encode() + image_data + ("\r\n--" + boundary + "--\r\n").encode()
-
-    headers["Content-Type"] = "multipart/form-data; boundary=" + boundary
+    ).encode() + image_data + (
+        "\r\n--" + boundary + "\r\n" +
+        'Content-Disposition: form-data; name="text"\r\n\r\n' +
+        prompt_text + "\r\n" +
+        "--" + boundary + "--\r\n"
+    ).encode()
 
     try:
         response = requests.post(url, headers=headers, data=body)
@@ -71,6 +72,7 @@ def send_image_to_deepai(image_data, api_key):
         response.close()
     except Exception as e:
         print("Fehler beim Senden:", e)
+
 
 # Main-Loop
 connect_wifi(SSID, PASSWORD)
