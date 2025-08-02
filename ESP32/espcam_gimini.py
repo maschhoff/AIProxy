@@ -1,4 +1,4 @@
-# AIProxy ESP32 CAM Image Module
+# AIProxy ESP32 CAM Image Module 
 # Angepasst für Gemini API
 
 import network
