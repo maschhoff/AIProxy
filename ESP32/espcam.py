@@ -1,5 +1,5 @@
-# AIProxy ESP32 CAM Image Module using GIMINI AI
-# © 2025 Mathias Aschhoff
+# AIProxy ESP32 CAM Image Module
+# Angepasst für Gemini API
 
 import network
 import urequests as requests
@@ -13,7 +13,7 @@ import time
 import usocket
 import ussl
 import ubinascii
-import camera 
+import camera  # Passendes Kamera-Modul verwenden
 
 # Blitz-LED (GPIO 4)
 flash = machine.Pin(4, machine.Pin.OUT)
@@ -44,6 +44,9 @@ def capture_image():
     return buf
 
 def send_image_to_gemini(image_data, api_key):
+    """
+    Sendet ein Bild an die Gemini API, um den Zählerstand zu lesen.
+    """
     host = "generativelanguage.googleapis.com"
     port = 443
     path = f"/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key={api_key}"
@@ -58,7 +61,7 @@ def send_image_to_gemini(image_data, api_key):
             {
                 "parts": [
                     {
-                        "text": "Lese den Zählerstand und gib ihn nur als Integer zurück."
+                        "text": "Lese den Zählerstand ab. Gib das Ergebnis nur als Integer zurück."
                     },
                     {
                         "inlineData": {
