@@ -74,7 +74,7 @@ async def process_meter_image(file: UploadFile = File(...), mqtt_topic: str = Qu
 
         try:
         
-        meter_reading = response.text.strip()
+            meter_reading = response.text.strip()
         
             if not meter_reading.isdigit():
                 print(f"WARNUNG: Zählerstand ist keine Zahl: '{meter_reading}'. Versuche trotzdem zu senden.")
