@@ -33,7 +33,11 @@ def connect_wifi(ssid, password):
 def capture_image():
     flash.on()
     time.sleep(0.2)
-    camera.init(0, format=camera.JPEG)
+    camera.init(0, format=camera.JPEG, fb_location=camera.PSRAM)
+    camera.quality(20)
+    camera.contrast(2)
+    camera.brightness(-2)
+    camera.saturation(-2)
     buf = camera.capture()
     flash.off()
     camera.deinit()
@@ -61,7 +65,7 @@ def send_image_to_gemini(image_data, api_key):
             {
                 "parts": [
                     {
-                        "text": "Lese den Zählerstand ab. Gib das Ergebnis nur als Integer zurück."
+                        "text": "Lese den Zählerstand ab. Antworte mit einer einzigen ganzen Zahl. Gib nur die Zahl aus, keine zusätzlichen Worte oder Zeichen."
                     },
                     {
                         "inlineData": {
@@ -128,29 +132,58 @@ def send_image_to_gemini(image_data, api_key):
         print("Fehler beim Senden an Gemini:", e)
         return 0
 
-def send_mqtt(zaehlerstand, broker, port, topic):
+
+
+def send_image_to_ai(image_data, backend):
+    url = "http://" + backend + "/process_meter_image?mqtt_topic="+MQTT_TOPIC
+    
+    # Multipart/FormData bauen
+    boundary = "----WebKitFormBoundary7MA4YWxkTrZu0gW"
+    headers = {
+        "Content-Type": f"multipart/form-data; boundary={boundary}"
+    }
+    
+    # Multipart body als Bytes zusammensetzen
+    body_start = (
+        "--{}\r\n".format(boundary) +
+        'Content-Disposition: form-data; name="file"; filename="image.jpg"\r\n' +
+        "Content-Type: image/jpeg\r\n\r\n"
+    ).encode()
+
+    body_end = "\r\n--{}--\r\n".format(boundary).encode()
+
+    body = body_start + image_data + body_end
+    
     try:
-        # Zeit holen im Format ISO 8601
-        t = time.localtime()
-        timestamp = "{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:{:02d}".format(*t[:6])
+        response = requests.post(url, headers=headers, data=body)
+        print("Status:", response.status_code)
+        if response.status_code == 200:
+            print("Antwort:", response.text)
+        response.close()
+    except Exception as e:
+        print("Fehler beim Senden:", e)
 
-        payload = {
-            "timestamp": timestamp,
-            "zaehlerstand": zaehlerstand
-        }
 
-        msg = json.dumps(payload)
+
+def send_mqtt(zaehlerstand, broker, port, topic):
+    
+    if not zaehlerstand.isdigit():
+        print("MQTT Error: Ergebnis ist keine Zahl")
+        return
+    
+    try:
 
         client = MQTTClient("esp32_cam", broker, port)
         client.connect()
-        client.publish(topic, msg)
-        print("MQTT gesendet:", msg)
+        client.publish(topic, zaehlerstand)
+        print("MQTT gesendet:", zaehlerstand)
         client.disconnect()
 
     except Exception as e:
         print("MQTT Fehler:", e)
 
 # Main-Loop
+print("...Smart Meter AI Cam starting...")
 connect_wifi(SSID, PASSWORD)
 
 while True:
@@ -158,5 +191,7 @@ while True:
     # Der Rückgabewert der Gemini-Funktion ist direkt der Zählerstand als Integer
     stand = send_image_to_gemini(img, API_KEY)
     send_mqtt(stand, MQTT_BROKER, MQTT_PORT, MQTT_TOPIC)
-    time.sleep(600)  # alle 10 Minuten
+    send_image_to_ai(img,'192.168.0.109:8000')
+    print("waiting...")
+    time.sleep(3600)  # alle 10 Minuten
 
