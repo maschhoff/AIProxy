@@ -31,22 +31,29 @@ def connect_wifi(ssid, password):
 
 # Bild aufnehmen mit Blitz
 def capture_image():
-    flash.on()
-    time.sleep(0.2)
-    camera.init(0, format=camera.JPEG, fb_location=camera.PSRAM)
-    camera.framesize(camera.FRAME_XGA)
-    camera.quality(10)
-    camera.contrast(2)
-    camera.brightness(2)
-    camera.saturation(-2)
-    buf = camera.capture()
-    flash.off()
-    camera.deinit()
-    if not buf:
-        print("Fehler bei der Bildaufnahme")
-        sys.exit()
-    print("Bild aufgenommen")
-    return buf
+    try:
+        flash.on()
+        time.sleep(0.2)
+        camera.init(0, format=camera.JPEG, fb_location=camera.PSRAM)
+        camera.framesize(camera.FRAME_XGA)
+        camera.quality(10)
+        camera.contrast(2)
+        camera.brightness(2)
+        camera.saturation(-2)
+        buf = camera.capture()
+        flash.off()
+        camera.deinit()
+        if not buf:
+            print("Fehler bei der Bildaufnahme")
+            flash.off
+            machine.reset()
+        print("Bild aufgenommen")
+        return buf
+    except Exception as e:
+        print("Fehler beim Bild aufnehmen:", e)
+        flash.off
+        machine.reset()
+        return 0
 
 def send_image_to_gemini(image_data, api_key):
     """
@@ -54,11 +61,12 @@ def send_image_to_gemini(image_data, api_key):
     """
     host = "generativelanguage.googleapis.com"
     port = 443
-    path = f"/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key={api_key}"
+    path = f"/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
 
     # Bild als base64-String kodieren
     # Gemini erwartet nur den base64-Teil ohne den Daten-URI-Präfix
-    image_base64 = ubinascii.b2a_base64(image_data).decode().replace("\n", "")
+    #image_base64 = ubinascii.b2a_base64(image_data).decode().replace("\n", "")
+    image_base64 = ubinascii.b2a_base64(image_data).strip().decode()
 
     # JSON-Body für Gemini erstellen
     data = {
@@ -66,7 +74,7 @@ def send_image_to_gemini(image_data, api_key):
             {
                 "parts": [
                     {
-                        "text": "Lese den Zählerstand ab. Antworte mit einer einzigen ganzen Zahl. Gib nur die Zahl aus, keine zusätzlichen Worte oder Zeichen."
+                        "text": "Lese den Zählerstand ab, es müssen 6 Stellen vor dem Komma sein. Gib das Ergebnis als Zahl aus, keine zusätzlichen Worte oder Zeichen!"
                     },
                     {
                         "inlineData": {
@@ -168,12 +176,7 @@ def send_image_to_ai(image_data, backend):
 
 def send_mqtt(zaehlerstand, broker, port, topic):
     
-    if not zaehlerstand.isdigit():
-        print("MQTT Error: Ergebnis ist keine Zahl")
-        return
-    
     try:
-
         client = MQTTClient("esp32_cam", broker, port)
         client.connect()
         client.publish(topic, zaehlerstand)
@@ -182,6 +185,7 @@ def send_mqtt(zaehlerstand, broker, port, topic):
 
     except Exception as e:
         print("MQTT Fehler:", e)
+        return
 
 # Main-Loop
 print("...Smart Meter AI Cam starting...")
@@ -192,7 +196,6 @@ while True:
     # Der Rückgabewert der Gemini-Funktion ist direkt der Zählerstand als Integer
     stand = send_image_to_gemini(img, API_KEY)
     send_mqtt(stand, MQTT_BROKER, MQTT_PORT, MQTT_TOPIC)
-    send_image_to_ai(img,'192.168.0.109:8000')
+    #send_image_to_ai(img,'192.168.0.109:8000')
     print("waiting...")
     time.sleep(3600)  # alle 10 Minuten
-
