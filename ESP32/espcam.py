@@ -175,27 +175,34 @@ def send_image_to_ai(image_data, backend):
 
 # SEND TO MQTT
 def send_mqtt(zaehlerstand, broker, port, topic):
-
-"""
-TODO
-
-{
-  "name": "Stromzählerstand",
-  "state_topic": "dein/mqtt/topic",
-  "unit_of_measurement": "kWh",
-  "device_class": "energy",
-  "state_class": "total_increasing"
-}
-Diese JSON musst du an das Topic z. B. homeassistant/sensor/stromzaehler/config senden.
-
-"""
-
-    
     try:
         client = MQTTClient("esp32_cam", broker, port)
         client.connect()
+
+        # 1. Discovery-Konfiguration senden
+        discovery_topic = "homeassistant/sensor/stromzaehler/config"
+        discovery_payload = {
+            "name": "Stromzähler",
+            "unique_id": "esp32_stromzaehler_1",
+            "state_topic": topic,
+            "unit_of_measurement": "kWh",
+            "device_class": "energy",
+            "state_class": "total_increasing",
+            "device": {
+                "identifiers": ["esp32_stromzaehler_1"],
+                "name": "ESP32 Stromzähler",
+                "manufacturer": "ESP",
+                "model": "ESP32-CAM"
+            }
+        }
+
+        client.publish(discovery_topic, json.dumps(discovery_payload), retain=True)
+        print("MQTT Discovery-Konfiguration gesendet.")
+
+        # 2. Zählerstand senden
         client.publish(topic, zaehlerstand)
-        print("MQTT gesendet:", zaehlerstand)
+        print("MQTT Zählerstand gesendet:", zaehlerstand)
+
         client.disconnect()
 
     except Exception as e:
