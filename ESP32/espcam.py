@@ -142,7 +142,7 @@ def send_image_to_gemini(image_data, api_key):
         return 0
 
 
-
+# ONLY FOR DEBUG!!!
 def send_image_to_ai(image_data, backend):
     url = "http://" + backend + "/process_meter_image?mqtt_topic="+MQTT_TOPIC
     
@@ -173,7 +173,7 @@ def send_image_to_ai(image_data, backend):
         print("Fehler beim Senden:", e)
 
 
-
+# SEND TO MQTT
 def send_mqtt(zaehlerstand, broker, port, topic):
     
     try:
@@ -190,12 +190,24 @@ def send_mqtt(zaehlerstand, broker, port, topic):
 # Main-Loop
 print("...Smart Meter AI Cam starting...")
 connect_wifi(SSID, PASSWORD)
+last_reading = 0
 
 while True:
     img = capture_image()
-    # Der Rückgabewert der Gemini-Funktion ist direkt der Zählerstand als Integer
     stand = send_image_to_gemini(img, API_KEY)
-    send_mqtt(stand, MQTT_BROKER, MQTT_PORT, MQTT_TOPIC)
-    #send_image_to_ai(img,'192.168.0.109:8000')
+
+    try:
+        stand= stand.replace(".", "")
+        stand_int = int(stand)
+    except:
+        print("Ungültiger Zählerstand empfangen:", stand)
+        continue
+
+    if stand_int > last_reading:
+        send_mqtt(str(stand_int), MQTT_BROKER, MQTT_PORT, MQTT_TOPIC)
+        last_reading = stand_int
+    else:
+        print("Zählerstand ist nicht höher – MQTT wird nicht gesendet.")
+
     print("waiting...")
-    time.sleep(3600)  # alle 10 Minuten
+    time.sleep(3600)
