@@ -200,8 +200,8 @@ def send_mqtt(zaehlerstand):
             }
         }
 
-        client.publish(discovery_topic, json.dumps(discovery_payload), retain=True)
-        print("MQTT Discovery-Konfiguration gesendet.")
+        #client.publish(discovery_topic, json.dumps(discovery_payload), retain=True)
+        #print("MQTT Discovery-Konfiguration gesendet.")
 
         client.disconnect()
 
