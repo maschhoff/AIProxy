@@ -174,7 +174,7 @@ def send_image_to_ai(image_data, backend):
 
 
 # SEND TO MQTT
-def send_mqtt(zaehlerstand):
+def send_mqtt(zaehlerstand, image_data):
     try:
         client = MQTTClient("esp32_cam", MQTT_BROKER, MQTT_PORT)
         client.connect()
@@ -200,8 +200,12 @@ def send_mqtt(zaehlerstand):
             }
         }
 
-        #client.publish(discovery_topic, json.dumps(discovery_payload), retain=True)
-        #print("MQTT Discovery-Konfiguration gesendet.")
+        client.publish(discovery_topic, json.dumps(discovery_payload), retain=True)
+        print("MQTT Discovery-Konfiguration gesendet.")
+
+        # Das Bild senden (für die Kamera-Entität)
+        client.publish(MQTT_TOPIC+"/img", image_data)
+        print("MQTT Bild gesendet.")
 
         client.disconnect()
 
@@ -226,7 +230,7 @@ while True:
         continue
 
     if stand_int > last_reading:
-        send_mqtt(str(stand_int))
+        send_mqtt(str(stand_int), img)
         last_reading = stand_int
     else:
         print("Zählerstand ist nicht höher – MQTT wird nicht gesendet.")
