@@ -48,6 +48,21 @@ Das Skript wird automatisch ausgeführt und führt folgende Schritte in einer En
 3.  Sendet das Bild an das Backend unter der URL `http://BACKEND/process_meter_image?mqtt_topic=MQTT_TOPIC`.
 4.  Wartet die im Skript definierte Zeit (standardmäßig 10 Minuten), bevor der Zyklus erneut beginnt.
 
+## Home Assistant Integration
+
+Füge dies zur configuration.yaml hinzu:
+
+"""
+mqtt:
+  sensor:
+    - name: "Stromzählerstand"
+      state_topic: "zaehlerstand/Strom"
+      unit_of_measurement: "kWh"
+      device_class: energy
+      state_class: total_increasing
+"""
+
+
 ---
 
 ### Autor
