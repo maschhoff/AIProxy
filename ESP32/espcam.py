@@ -175,6 +175,21 @@ def send_image_to_ai(image_data, backend):
 
 # SEND TO MQTT
 def send_mqtt(zaehlerstand, broker, port, topic):
+
+"""
+TODO
+
+{
+  "name": "Stromzählerstand",
+  "state_topic": "dein/mqtt/topic",
+  "unit_of_measurement": "kWh",
+  "device_class": "energy",
+  "state_class": "total_increasing"
+}
+Diese JSON musst du an das Topic z. B. homeassistant/sensor/stromzaehler/config senden.
+
+"""
+
     
     try:
         client = MQTTClient("esp32_cam", broker, port)
