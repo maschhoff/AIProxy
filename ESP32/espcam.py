@@ -174,17 +174,21 @@ def send_image_to_ai(image_data, backend):
 
 
 # SEND TO MQTT
-def send_mqtt(zaehlerstand, broker, port, topic):
+def send_mqtt(zaehlerstand):
     try:
-        client = MQTTClient("esp32_cam", broker, port)
+        client = MQTTClient("esp32_cam", MQTT_BROKER, MQTT_PORT)
         client.connect()
 
-        # 1. Discovery-Konfiguration senden
+        # Zählerstand senden
+        client.publish(MQTT_TOPIC, zaehlerstand)
+        print("MQTT Zählerstand gesendet:", zaehlerstand)
+
+        # Discovery-Konfiguration senden
         discovery_topic = "homeassistant/sensor/stromzaehler/config"
         discovery_payload = {
             "name": "Stromzähler",
             "unique_id": "esp32_stromzaehler_1",
-            "state_topic": topic,
+            "state_topic": MQTT_TOPIC,
             "unit_of_measurement": "kWh",
             "device_class": "energy",
             "state_class": "total_increasing",
@@ -198,10 +202,6 @@ def send_mqtt(zaehlerstand, broker, port, topic):
 
         client.publish(discovery_topic, json.dumps(discovery_payload), retain=True)
         print("MQTT Discovery-Konfiguration gesendet.")
-
-        # 2. Zählerstand senden
-        client.publish(topic, zaehlerstand)
-        print("MQTT Zählerstand gesendet:", zaehlerstand)
 
         client.disconnect()
 
@@ -226,7 +226,7 @@ while True:
         continue
 
     if stand_int > last_reading:
-        send_mqtt(str(stand_int), MQTT_BROKER, MQTT_PORT, MQTT_TOPIC)
+        send_mqtt(str(stand_int))
         last_reading = stand_int
     else:
         print("Zählerstand ist nicht höher – MQTT wird nicht gesendet.")
