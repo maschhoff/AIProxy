@@ -25,7 +25,7 @@ Dieses MicroPython-Skript für einen **ESP32-CAM** oder **ESP32-S3-CAM** erfasst
 
 ### Software
 
-* **MicroPython Firmware:** CAM Firmware -> ([https://github.com/lemariva/micropython-camera-driver](https://github.com/cnadler86/micropython-camera-API/releases/))
+* **MicroPython Firmware:** CAM Firmware -> (https://github.com/cnadler86/micropython-camera-API/releases/)
 * **MicroPython:** Das Skript ist für die Ausführung unter MicroPython konzipiert.
 * **`camera` Modul:** Ein passendes `camera`-Modul für MicroPython ist erforderlich. Die genaue Implementierung kann je nach ESP32-CAM-Variante variieren.
 
