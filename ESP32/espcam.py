@@ -1,5 +1,4 @@
 # AIProxy ESP32 CAM Image Module
-# Angepasst für Gemini API
 
 import network
 import urequests as requests
