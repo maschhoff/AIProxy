@@ -141,8 +141,39 @@ def send_image_to_gemini(image_data, api_key):
         return 0
 
 
+# ONLY FOR DEBUG!!!
+def send_image_to_ai(image_data, backend):
+    url = "http://" + backend + "/process_meter_image?mqtt_topic="+MQTT_TOPIC
+    
+    # Multipart/FormData bauen
+    boundary = "----WebKitFormBoundary7MA4YWxkTrZu0gW"
+    headers = {
+        "Content-Type": f"multipart/form-data; boundary={boundary}"
+    }
+    
+    # Multipart body als Bytes zusammensetzen
+    body_start = (
+        "--{}\r\n".format(boundary) +
+        'Content-Disposition: form-data; name="file"; filename="image.jpg"\r\n' +
+        "Content-Type: image/jpeg\r\n\r\n"
+    ).encode()
+
+    body_end = "\r\n--{}--\r\n".format(boundary).encode()
+
+    body = body_start + image_data + body_end
+    
+    try:
+        response = requests.post(url, headers=headers, data=body)
+        print("Status:", response.status_code)
+        if response.status_code == 200:
+            print("Antwort:", response.text)
+        response.close()
+    except Exception as e:
+        print("Fehler beim Senden:", e)
+
+
 # SEND TO MQTT
-def send_mqtt(zaehlerstand, image_data):
+def send_mqtt(zaehlerstand):
     try:
         client = MQTTClient("esp32_cam", MQTT_BROKER, MQTT_PORT)
         client.connect()
@@ -168,13 +199,8 @@ def send_mqtt(zaehlerstand, image_data):
             }
         }
 
-        client.publish(discovery_topic, json.dumps(discovery_payload), retain=True)
-        print("MQTT Discovery-Konfiguration gesendet.")
-
-        # Das Bild senden (für die Kamera-Entität)
-        if DEBUG:
-            client.publish(MQTT_TOPIC+"/img", image_data)
-            print("MQTT Bild gesendet.")
+        #client.publish(discovery_topic, json.dumps(discovery_payload), retain=True)
+        #print("MQTT Discovery-Konfiguration gesendet.")
 
         client.disconnect()
 
@@ -199,7 +225,7 @@ while True:
         continue
 
     if stand_int > last_reading:
-        send_mqtt(str(stand_int), img)
+        send_mqtt(str(stand_int))
         last_reading = stand_int
     else:
         print("Zählerstand ist nicht höher – MQTT wird nicht gesendet.")
