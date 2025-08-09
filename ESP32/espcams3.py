@@ -40,7 +40,7 @@ def connect_wifi(ssid, password):
 def capture_image():
     try:
         #flash on
-        np[0] = (200, 200, 200)
+        np[0] = (255, 255, 255)
         np.write()
         time.sleep(3)
         
@@ -50,6 +50,14 @@ def capture_image():
             jpeg_quality=90,
             fb_count=2,
             grab_mode=GrabMode.WHEN_EMPTY)
+        
+        cam.set_vflip(True)
+        cam.set_hmirror(True)
+        #cam.set_aec2(True)
+        #cam.set_sharpness(2)
+        cam.set_saturation(-2)
+        cam.set_contrast(2)
+        cam.set_brightness(2)
         
         #Bild aufnehmen
         buf = cam.capture()
@@ -182,7 +190,35 @@ def send_mqtt(zaehlerstand):
     except Exception as e:
         print("MQTT Fehler:", e)
         return
+
+def send_image_to_ai(image_data):
+    url = "http://192.168.0.109:8000/process_meter_image?mqtt_topic="+MQTT_TOPIC
     
+    # Multipart/FormData bauen
+    boundary = "----WebKitFormBoundary7MA4YWxkTrZu0gW"
+    headers = {
+        "Content-Type": f"multipart/form-data; boundary={boundary}"
+    }
+    
+    # Multipart body als Bytes zusammensetzen
+    body_start = (
+        "--{}\r\n".format(boundary) +
+        'Content-Disposition: form-data; name="file"; filename="image.jpg"\r\n' +
+        "Content-Type: image/jpeg\r\n\r\n"
+    ).encode()
+
+    body_end = "\r\n--{}--\r\n".format(boundary).encode()
+
+    body = body_start + image_data + body_end
+    
+    try:
+        response = urequests.post(url, headers=headers, data=body)
+        print("Status:", response.status_code)
+        if response.status_code == 200:
+            print("Antwort:", response.text)
+        response.close()
+    except Exception as e:
+        print("Fehler beim Senden:", e)
     
 
 # Main-Loop
@@ -200,6 +236,7 @@ art = r"""
 |  \   .-.   V   .-.   / |
  \  '--' '--' '--' '--' /
   '---------------------'
+https://github.com/maschhoff/
 """
 print(art)
 
@@ -210,6 +247,7 @@ while True:
 
     try:
         img = capture_image()
+        #send_image_to_ai(img)
         stand = send_image_to_gemini(img, API_KEY)
         stand= stand.replace(".", "")
         stand_int = int(stand)  
