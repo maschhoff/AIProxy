@@ -22,14 +22,19 @@ np = neopixel.NeoPixel(Pin(48), 1)
 
 # WLAN verbinden
 def connect_wifi(ssid, password):
+    np[0] = (0, 0, 200)
+    np.write()
+    
     wlan = network.WLAN(network.STA_IF)
     wlan.active(True)
     if not wlan.isconnected():
         print('Verbinde mit WLAN...')
         wlan.connect(ssid, password)
-        while not wlan.isconnected():
+        while not wlan.isconnected():          
             time.sleep(1)
     print('Netzwerk config:', wlan.ifconfig())
+    np[0] = (0, 200, 0)
+    np.write()
 
 # Bild aufnehmen mit Blitz
 def capture_image():
@@ -37,39 +42,23 @@ def capture_image():
         #flash on
         np[0] = (200, 200, 200)
         np.write()
+        time.sleep(3)
         
-        #camera
+        #camera    
+        cam = Camera(pixel_format=PixelFormat.JPEG,
+            frame_size=FrameSize.XGA,
+            jpeg_quality=90,
+            fb_count=2,
+            grab_mode=GrabMode.WHEN_EMPTY)
         
-        print("Camera...")
-        
-        cam = Camera(
-            data_pins=[16, 17, 18, 12, 11, 10, 9, 8],  # Y9…Y2/Y5…Y4 entsprechend Reihenfolge
-            vsync_pin=6,
-            href_pin=7,
-            sda_pin=4,
-            scl_pin=5,
-            pclk_pin=13,
-            xclk_pin=15,
-            xclk_freq=20000000,
-            powerdown_pin=-1,
-            reset_pin=-1,
-        )
-        
-        
-        print("Camera init...")
-        cam.init()
-        cam.reconfigure(pixel_format=PixelFormat.JPEG,frame_size=FrameSize.QVGA,grab_mode=GrabMode.LATEST, fb_count=2)
-        
-
-
-        print("Camera capture...")
+        #Bild aufnehmen
         buf = cam.capture()
 
         #flash off
         np[0] = (0, 0, 0)
         np.write()
         
-        #cam.free_buffer() 
+        cam.free_buffer() 
 
         if not buf:
             print("Fehler bei der Bildaufnahme")
@@ -121,22 +110,33 @@ def send_image_to_gemini(image_data, api_key):
     }
     
     try:
-        print("sending...")
         response = urequests.post(url, headers=headers, data=json_data)
+
         if response.status_code == 200:
-            print("get..." + response)
-            result = response.json()
-            # The structure of the response might vary slightly. Adjust as needed.
-            if 'candidates' in result and len(result['candidates']) > 0:
-                if 'content' in result['candidates'][0] and 'parts' in result['candidates'][0]['content'] and len(result['candidates'][0]['content']['parts']) > 0:
-                    # The meter reading is typically in the 'text' field of the first part
-                    meter_reading = result['candidates'][0]['content']['parts'][0]['text']
-                    print("res..." + meter_reading)
-                    response.close()
-                    return meter_reading
-        
-        print(f"Error: Status code {response.status_code}")
-        print(response.text)
+            try:
+                result = response.json()
+            except Exception as e:
+                print("JSON parse error:", e)
+                print("Response text:", response.text)
+                response.close()
+                return None
+
+            if (
+                'candidates' in result and
+                result['candidates'] and
+                'content' in result['candidates'][0] and
+                'parts' in result['candidates'][0]['content'] and
+                result['candidates'][0]['content']['parts'] and
+                'text' in result['candidates'][0]['content']['parts'][0]
+            ):
+                meter_reading = result['candidates'][0]['content']['parts'][0]['text']
+                print("res...", meter_reading)
+                response.close()
+                return meter_reading
+        else:
+            print(f"Error: Status code {response.status_code}")
+            print(response.text)
+
         response.close()
         return None
 
@@ -147,7 +147,7 @@ def send_image_to_gemini(image_data, api_key):
 
 
 # SEND TO MQTT
-def send_mqtt(zaehlerstand, image_data):
+def send_mqtt(zaehlerstand):
     print("send_mqtt")
     try:
         client = MQTTClient("esp32_cam", MQTT_BROKER, MQTT_PORT)
@@ -177,12 +177,6 @@ def send_mqtt(zaehlerstand, image_data):
         client.publish(discovery_topic, json.dumps(discovery_payload), retain=True)
         print("MQTT Discovery-Konfiguration gesendet.")
 
-        # Das Bild senden (für die Kamera-Entität)
-        if DEBUG:
-            image_base64 = ubinascii.b2a_base64(image_data).strip().decode()
-            client.publish(MQTT_TOPIC+"/img", image_base64)
-            print("MQTT Bild gesendet.")
-
         client.disconnect()
 
     except Exception as e:
@@ -190,56 +184,33 @@ def send_mqtt(zaehlerstand, image_data):
         return
     
     
-def send_image_to_ai(image_data):
-    print("DEBUG")
-    url = "http://192.168.0.109:8000/process_meter_image?mqtt_topic=z/s"
-    
-    # Multipart/FormData bauen
-    boundary = "----WebKitFormBoundary7MA4YWxkTrZu0gW"
-    headers = {
-        "Content-Type": f"multipart/form-data; boundary={boundary}"
-    }
-    
-    # Multipart body als Bytes zusammensetzen
-    body_start = (
-        "--{}\r\n".format(boundary) +
-        'Content-Disposition: form-data; name="file"; filename="image.jpg"\r\n' +
-        "Content-Type: image/jpeg\r\n\r\n"
-    ).encode()
-
-    body_end = "\r\n--{}--\r\n".format(boundary).encode()
-
-    body = body_start + image_data + body_end
-    
-
-    
-    try:
-        #response = urequests.post(url, headers=headers, data=body)
-        
-        headers = {"Content-Type": "application/octet-stream"}
-        response = urequests.post(url, headers=headers, data=image_data)
-        
-        print("Status:", response.status_code)
-        if response.status_code == 200:
-            print("Antwort:", response.text)
-        response.close()
-    except Exception as e:
-        print("Fehler beim Senden:", e)
-
 
 # Main-Loop
-print("...Smart Meter AI Cam starting...")
+
+
+art = r"""
+   .-------------------.
+  /  .--------------.  \
+ /  /  .---------.   \  \
+|  |  |  AI CAM  |   |  |
+|  |  '---------'    |  |
+|  '-----------------'  |
+|   .-._.-.   .-._.-.   |
+|  /  o   o \ /  o   o\  |
+|  \   .-.   V   .-.   / |
+ \  '--' '--' '--' '--' /
+  '---------------------'
+"""
+print(art)
+
 connect_wifi(SSID, PASSWORD)
 last_reading = 0
 
 while True:
 
-    
-
     try:
         img = capture_image()
-        send_image_to_ai(img)
-        #stand = send_image_to_gemini(img, API_KEY)
+        stand = send_image_to_gemini(img, API_KEY)
         stand= stand.replace(".", "")
         stand_int = int(stand)  
     except Exception as e:
@@ -248,7 +219,7 @@ while True:
         continue
 
     if stand_int > last_reading:
-        send_mqtt(str(stand_int), img)
+        send_mqtt(str(stand_int))
         last_reading = stand_int
     else:
         print("Zählerstand ist nicht höher – MQTT wird nicht gesendet.")
