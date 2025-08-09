@@ -61,7 +61,7 @@ mqtt:
       unit_of_measurement: "kWh"
       device_class: energy
       state_class: total_increasing
-
+```
 
 ---
 
