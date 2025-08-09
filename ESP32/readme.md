@@ -53,7 +53,7 @@ Das Skript wird automatisch ausgeführt und führt folgende Schritte in einer En
 
 Füge dies zur configuration.yaml hinzu:
 
-"""
+```yaml
 mqtt:
   sensor:
     - name: "Stromzählerstand"
@@ -61,7 +61,6 @@ mqtt:
       unit_of_measurement: "kWh"
       device_class: energy
       state_class: total_increasing
-"""
 
 
 ---
