@@ -89,8 +89,8 @@ def send_image_to_chatgpt(image_data, api_key):
     url = "https://api.openai.com/v1/chat/completions"
 
     # Bild in Base64 umwandeln
-    image_base64 = ubinascii.b2a_base64(image_data).strip().decode()
-
+    image_base64 = ubinascii.b2a_base64(image_data).decode().replace("\n", "")
+    
     # JSON-Body für ChatGPT Vision
     data = {
         "model": "gpt-4o-mini",  # Kleiner, schneller Vision-geeigneter GPT
@@ -100,7 +100,7 @@ def send_image_to_chatgpt(image_data, api_key):
                 "content": [
                     {
                         "type": "text",
-                        "text": "Lese den Zählerstand ab, es müssen 6 Stellen vor dem Komma sein. Gib das Ergebnis als Zahl aus, keine zusätzlichen Worte oder Zeichen!"
+                        "text": "Erhöhe den Kontrast des Bildes. Verringere das Gamma in dem Bild. Negiere das Bild. Dann lese den Zählerstand ab, es müssen 6 Stellen vor dem Komma sein. Gib das Ergebnis als Zahl aus, keine zusätzlichen Worte oder Zeichen!"
                     },
                     {
                         "type": "image_url",
@@ -315,7 +315,7 @@ while True:
     except Exception as e:
         print("Fehler in Main:", e)
         time.sleep(3600)
-        continue
+        machine.reset()
 
     if stand_int > last_reading:
         send_mqtt(str(stand_int))
