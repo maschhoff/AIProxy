@@ -120,7 +120,9 @@ def send_image_to_chatgpt(image_data, api_key):
     }
 
     try:
-        response = urequests.post(url, headers=headers, data=json.dumps(data))
+        data_bytes = json.dumps(data).encode("utf-8")
+        response = urequests.post(url, headers=headers, data=data_bytes)
+    
         
         if response.status_code == 200:
             try:
