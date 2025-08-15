@@ -58,6 +58,8 @@ async def process_meter_image(file: UploadFile = File(...), mqtt_topic: str = Qu
             with open(file_path, "wb") as f:
                 f.write(image_bytes)
 
+        #stop here
+        break
         
         image_part = {
             "mime_type": file.content_type,
