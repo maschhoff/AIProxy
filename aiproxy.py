@@ -38,7 +38,7 @@ def read_meter(img_bgr):
     return {"text": text, "conf": float(box.conf[0])}
 
 
-@app.post("/predict")
+@app.post("/process_meter_image")
 async def predict(file: UploadFile = File(...)):
     data = await file.read()
     img = cv2.imdecode(np.frombuffer(data, np.uint8), cv2.IMREAD_COLOR)
