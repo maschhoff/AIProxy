@@ -43,4 +43,5 @@ async def predict(file: UploadFile = File(...)):
     data = await file.read()
     img = cv2.imdecode(np.frombuffer(data, np.uint8), cv2.IMREAD_COLOR)
     out = read_meter(img)
+    print("Ergebnis:" +  out)
     return out
