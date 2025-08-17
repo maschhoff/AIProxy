@@ -13,7 +13,7 @@ DEBUG = os.getenv("DEBUG", "false").lower() in ["1", "true", "yes"]
 
 
 @app.post("/process_meter_image")
-async def process_meter_image(file: UploadFile = File(...), mqtt_topic: str = Query(...)):
+async def process_meter_image(file: UploadFile = File(...)):
 
     if not file.content_type.startswith("image/"):
         raise HTTPException(status_code=400, detail="Uploaded file is not an image.")
