@@ -55,9 +55,9 @@ def capture_image():
         cam.set_hmirror(True)
         #cam.set_aec2(True)
         #cam.set_sharpness(2)
-        cam.set_saturation(-2)
+        cam.set_saturation(0)
         cam.set_contrast(2)
-        cam.set_brightness(2)
+        cam.set_brightness(1)
         
         #Bild aufnehmen
         buf = cam.capture()
@@ -93,14 +93,14 @@ def send_image_to_chatgpt(image_data, api_key):
     
     # JSON-Body für ChatGPT Vision
     data = {
-        "model": "gpt-4o-mini",  # Kleiner, schneller Vision-geeigneter GPT
+        "model": "gpt-4o",  # Kleiner, schneller Vision-geeigneter GPT
         "messages": [
             {
                 "role": "user",
                 "content": [
                     {
                         "type": "text",
-                        "text": "Erhöhe den Kontrast des Bildes. Verringere das Gamma in dem Bild. Negiere das Bild. Dann lese den Zählerstand ab, es müssen 6 Stellen vor dem Komma sein. Gib das Ergebnis als Zahl aus, keine zusätzlichen Worte oder Zeichen!"
+                        "text": "Lies den Zählerstand auf dem Bild ab. Es müssen genau 6 Stellen vor dem Komma sein (z. B. 001234, 123456, 000789). Falls ein Dezimalpunkt oder Komma vorhanden ist, ignoriere die Nachkommastellen. Gib ausschließlich die 6-stellige Zahl aus — keine zusätzlichen Wörter, Symbole oder Einheiten."
                     },
                     {
                         "type": "image_url",
@@ -308,7 +308,8 @@ while True:
 
     try:
         img = capture_image()
-        #send_image_to_ai_proxy(img)
+        send_image_to_ai_proxy(img)
+        # stand="4711"
         stand = send_image_to_chatgpt(img, API_KEY)
         stand= stand.replace(".", "")
         stand_int = int(stand)  
