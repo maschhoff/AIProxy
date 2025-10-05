@@ -1,5 +1,5 @@
 # ESP32 S3 CAM Image Module
-# mpy_cam-v1.25.0-FREENOVE_ESP32S3_CAM.zip -> https://github.com/cnadler86/micropython-camera-API/releases
+# mpy_cam-v1.25.0-FREENOVE_ESP32S3_CAM.zip -> https://github.com/maschhoff/micropython-camera-API
 
 import neopixel
 import network
